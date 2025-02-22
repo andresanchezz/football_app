@@ -34,6 +34,12 @@ const HomeTabNavigation = () => {
                 title: "Profile",
                 headerTitleAlign: 'center'
             }} name="ProfileScreen" component={ProfileScreen} />
+
+            {/* <Tab.Screen options={{
+                title: "Profile",
+                headerTitleAlign: 'center'
+            }} name="ProfileScreen" component={ProfileScreen} /> */}
+
         </Tab.Navigator>
     )
 };

@@ -6,34 +6,48 @@ import { FlatList } from "react-native-gesture-handler";
 import MatchCard from "../../components/matches/MatchCard";
 import MyCustomBottomSheet from "../../components/shared/MyCustomBottomSheet";
 import { CreateMatchForm } from "../../components/matches/CreateMatchForm";
-import CreatePlaceForm from "../../components/matches/CreatePlaceForm";
+import { useNavigation } from "@react-navigation/native";
+import { MatchDetails } from "../../components/matches/MatchDetails";
+import { JoinMatch } from "../../components/matches/JoinMatch";
 
 export const MatchesScreen = () => {
   const {
     getMatches,
-
     createMatch,
     matches,
-
     newMatchBottomSheet,
     newPlaceBottomSheet,
     matchDetailsBottomSheet,
     joinMatchBottomSheet,
     openBottomSheet,
-
     isLoading,
+    selectedMatch,
+    setSelectedMatch,
   } = useMatches();
+
+  const navigation = useNavigation();
 
   return (
     <View style={styles.mainView}>
       <FlatList
         data={matches}
         keyExtractor={(item, index) => String(index)}
-        renderItem={({ item }) => <MatchCard match={item} showDetails={()=>{openBottomSheet(matchDetailsBottomSheet)}}  joinMatch={()=>{openBottomSheet(joinMatchBottomSheet)}} />}
+        renderItem={({ item }) => (
+          <MatchCard
+            match={item}
+            showDetails={() => {
+              setSelectedMatch({ ...item });
+              openBottomSheet(matchDetailsBottomSheet);
+            }}
+            joinMatch={() => {
+              setSelectedMatch({ ...item });
+              openBottomSheet(joinMatchBottomSheet);
+            }}
+          />
+        )}
         onRefresh={getMatches}
         refreshing={isLoading}
       />
-
 
       <View style={styles.fabContainer}>
         <FAB
@@ -43,41 +57,31 @@ export const MatchesScreen = () => {
         />
         <FAB
           icon="map-marker"
-          onPress={() => openBottomSheet(newPlaceBottomSheet)}
+          onPress={() => navigation.navigate("PlaceScreen")}
           style={styles.fab}
         />
       </View>
 
-
-      {/* Create a match  */}
-      <MyCustomBottomSheet ref={newMatchBottomSheet} snapPoints={['10%', '75%']}>
+      {/* Modal para crear un partido */}
+      <MyCustomBottomSheet ref={newMatchBottomSheet} snapPoints={["10%", "75%"]}>
         <View>
           <CreateMatchForm />
         </View>
       </MyCustomBottomSheet>
 
-
-      {/* Crete a place  */}
-      <MyCustomBottomSheet ref={newPlaceBottomSheet} snapPoints={['10%', '75%']}>
+      {/* Modal para detalles del partido */}
+      <MyCustomBottomSheet ref={matchDetailsBottomSheet} snapPoints={["10%", "75%"]}>
         <View>
-          <CreatePlaceForm />
+          {selectedMatch && <MatchDetails match={selectedMatch} />}
         </View>
       </MyCustomBottomSheet>
 
-      {/* Match details */}
-      <MyCustomBottomSheet ref={matchDetailsBottomSheet} snapPoints={['10%', '75%']}>
+      {/* Modal para unirse a un partido */}
+      <MyCustomBottomSheet ref={joinMatchBottomSheet} snapPoints={["10%", "75%"]}>
         <View>
-          <Text>Details</Text>
+          {selectedMatch && <JoinMatch match={selectedMatch} />}
         </View>
       </MyCustomBottomSheet>
-
-      {/* Join match */}
-      <MyCustomBottomSheet ref={joinMatchBottomSheet} snapPoints={['10%', '75%']}>
-        <View>
-          <Text>Join match</Text>
-        </View>
-      </MyCustomBottomSheet>
-
     </View>
   );
 };
@@ -97,6 +101,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   fab: {
-
+    // Estilos adicionales para el FAB si es necesario
   },
 });

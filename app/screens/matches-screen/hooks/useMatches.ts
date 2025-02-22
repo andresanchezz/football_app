@@ -17,6 +17,8 @@ const useMatches = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const [matches, setMatches] = useState<Match[]>();
+    const [selectedMatch, setSelectedMatch] = useState<Match>();
+
 
     const [newMatchData, setNewMatchData] = useState<NewMatch>({
         peopleCapacity: 0,
@@ -90,7 +92,10 @@ const useMatches = () => {
         matchDetailsBottomSheet,
         joinMatchBottomSheet,
         openBottomSheet,
-        isLoading
+        isLoading,
+
+        selectedMatch,
+        setSelectedMatch
 
     }
 
