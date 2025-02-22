@@ -2,16 +2,16 @@ import * as SecureStore from 'expo-secure-store';
 import * as Sentry from "@sentry/react-native";
 import Toast from 'react-native-toast-message';
 
-
 import { apiServices } from '../../../api/services-qps';
 import { useState } from 'react';
-import { useAuthStore, useStateStore } from '../../../state';
-import { UserById } from '../../../interfaces/user/userById';
+import { useAuthStore, useStateStore, useUserDataStore } from '../../../state';
+
 
 const useLoginScreenHook = () => {
 
   const { setToken } = useAuthStore();
   const { setIsLoading } = useStateStore();
+  const { setUser } = useUserDataStore();
   const [username, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -35,11 +35,14 @@ const useLoginScreenHook = () => {
         password: password,
       });
 
-      setIsLoading(true)
-
       await SecureStore.setItemAsync('userToken', accessToken);
 
       setToken(accessToken);
+
+      await getUserInfo(id);
+
+      setIsLoading(true)
+
 
     } catch (error: any) {
 
@@ -54,6 +57,15 @@ const useLoginScreenHook = () => {
     }
   };
 
+  const getUserInfo = async (userId: number) => {
+    try {
+      const { data } = await apiServices.get(`/user/infouser/${userId}`)
+      setUser(data)
+      console.log(data)
+    } catch (error) {
+      console.log('Error getuserinfo', error)
+    }
+  }
 
   return {
     handleLogin,

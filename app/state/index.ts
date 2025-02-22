@@ -1,14 +1,12 @@
 import { create } from "zustand";
-import { UserById } from "../interfaces/user/userById";
+import { InfoUser } from "../interfaces/user/info-user";
 
 interface AuthStore {
     token: string;
     role: string;
-    user: UserById | null;
     setToken(token: string): void;
     setRole(role: string): void;
-    setUser(user: UserById): void;
-    signOut(): void; 
+    signOut(): void;
 }
 
 interface HomeStore {
@@ -21,6 +19,11 @@ interface StateStore {
     setIsLoading(isLoading: boolean): void;
 }
 
+interface UserDataStore {
+    setUser(user: InfoUser): void;
+    user: InfoUser | null;
+}
+
 
 
 const useAuthStore = create<AuthStore>((set) => ({
@@ -29,7 +32,6 @@ const useAuthStore = create<AuthStore>((set) => ({
     user: null,
     setToken: (token: string) => set((_) => ({ token })),
     setRole: (role: string) => set((_) => ({ role })),
-    setUser: (user: UserById) => set((_) => ({ user })),
     signOut: () => {
         set({ token: "" });
     },
@@ -38,6 +40,11 @@ const useAuthStore = create<AuthStore>((set) => ({
 const useHomeStore = create<HomeStore>((set) => ({
     isLoading: true,
     setIsLoading: (isLoading: boolean) => set((_) => ({ isLoading })),
+}));
+
+const useUserDataStore = create<UserDataStore>((set) => ({
+    user: null,
+    setUser: (user: InfoUser) => set((_) => ({ user }))
 }));
 
 const useStateStore = create<StateStore>((set) => ({
@@ -49,5 +56,6 @@ const useStateStore = create<StateStore>((set) => ({
 export {
     useAuthStore,
     useHomeStore,
-    useStateStore
+    useStateStore,
+    useUserDataStore
 };

@@ -19,3 +19,14 @@ export interface RegisteredUser {
     ticketsBought: number;
     assist:        boolean;
 }
+
+
+export interface NewMatch {
+    peopleCapacity:   number;
+    localName:        string;
+    visitorName:      string;
+    placeId:          number; 
+    startTime:        Date; 
+    endTime:          Date; 
+    entryCost:        number;
+}

@@ -10,7 +10,7 @@ import { RootParamList } from '../../navigation/kickoff-stack.navigation';
 import { typography } from '../../../styles/typography';
 import { buttonStyles } from '../../../styles/styles';
 import { colors } from '../../../styles/colors';
-import { LoadingButton } from '../../shared/components/loadingButton';
+
 
 
 export type LoginScreenNavigationProp = StackNavigationProp<RootParamList, 'LoginScreen'>;
@@ -56,7 +56,9 @@ const LoginScreen = () => {
             />
           </View>
 
-          <LoadingButton onPress={handleLogin} />
+          <TouchableOpacity onPress={handleLogin}>
+            <Text>click</Text>
+          </TouchableOpacity>
 
         </View>
       </ScrollView>
