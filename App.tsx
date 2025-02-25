@@ -4,7 +4,9 @@ import React from 'react'
 
 import KickoffStackNavigation from './app/navigation/kickoff-stack.navigation'
 
-import Toast from 'react-native-toast-message'
+import Toast from 'react-native-toast-message';
+
+import 'react-native-get-random-values';
 
 export default function App() {
   return (
