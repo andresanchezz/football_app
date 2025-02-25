@@ -1,14 +1,13 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Text, FAB } from "react-native-paper";
+import { Text, FAB, TextInput } from "react-native-paper";
 import useMatches from "./hooks/useMatches";
 import { FlatList } from "react-native-gesture-handler";
 import MatchCard from "../../components/matches/MatchCard";
 import MyCustomBottomSheet from "../../components/shared/MyCustomBottomSheet";
-import { CreateMatchForm } from "../../components/matches/CreateMatchForm";
 import { useNavigation } from "@react-navigation/native";
-import { MatchDetails } from "../../components/matches/MatchDetails";
-import { JoinMatch } from "../../components/matches/JoinMatch";
+import { MyLoadingButton } from "../../components/shared/MyLoadingButton";
+import { Dropdown } from "react-native-paper-dropdown";
 
 export const MatchesScreen = () => {
   const {
@@ -58,28 +57,53 @@ export const MatchesScreen = () => {
         <FAB
           icon="map-marker"
           onPress={() => navigation.navigate("PlaceScreen")}
-          style={styles.fab}
         />
       </View>
 
       {/* Modal para crear un partido */}
-      <MyCustomBottomSheet ref={newMatchBottomSheet} snapPoints={["10%", "75%"]}>
+      <MyCustomBottomSheet ref={newMatchBottomSheet} snapPoints={["50%", "85%"]}>
         <View>
-          <CreateMatchForm />
+          <View>
+
+            <Text style={styles.modalTitleMargin} variant="headlineSmall">Create match</Text>
+
+
+            <TextInput mode='outlined' label="People capacity" inputMode='numeric'></TextInput>
+            <TextInput mode='outlined' label="Local name"></TextInput>
+            <TextInput mode='outlined' label="Local visitor" ></TextInput>
+            <TextInput mode='outlined' label="Entry cost" inputMode='numeric'></TextInput>
+
+
+            <TextInput mode='outlined' label="Date start" ></TextInput>
+            <TextInput mode='outlined' label="Date finished" ></TextInput>
+
+            <Dropdown
+              label="Place"
+              mode='outlined'
+              options={[
+              ]}
+            />
+
+            <MyLoadingButton label="Create" onPress={() => { }} />
+
+          </View>
         </View>
       </MyCustomBottomSheet>
 
       {/* Modal para detalles del partido */}
       <MyCustomBottomSheet ref={matchDetailsBottomSheet} snapPoints={["10%", "75%"]}>
         <View>
-          {selectedMatch && <MatchDetails match={selectedMatch} />}
+          <Text style={styles.modalTitleMargin} variant="headlineSmall">Details</Text>
         </View>
       </MyCustomBottomSheet>
 
       {/* Modal para unirse a un partido */}
       <MyCustomBottomSheet ref={joinMatchBottomSheet} snapPoints={["10%", "75%"]}>
         <View>
-          {selectedMatch && <JoinMatch match={selectedMatch} />}
+          <Text style={styles.modalTitleMargin} variant="headlineSmall">Join</Text>
+
+          <MyLoadingButton label="Join match" onPress={() => { }} />
+
         </View>
       </MyCustomBottomSheet>
     </View>
@@ -100,7 +124,9 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     gap: 16,
   },
-  fab: {
-    // Estilos adicionales para el FAB si es necesario
-  },
+  modalTitleMargin: {
+    marginBottom: 10,
+    textAlign: 'center'
+  }
+
 });

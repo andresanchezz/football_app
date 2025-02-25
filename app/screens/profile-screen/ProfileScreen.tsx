@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import useProfile from "./hooks/useProfile.hook";
 import { Avatar, Text } from "react-native-paper";
 import { useUserDataStore } from "../../state";
+import { MyLoadingButton } from "../../components/shared/MyLoadingButton";
 
 
 
@@ -26,9 +27,9 @@ export const ProfileScreen = () => {
 
 
 
-      <TouchableOpacity onPress={handleSignOut}>
-        <Text>Log out</Text>
-      </TouchableOpacity>
+      <View style={{ width: '100%' }}>
+        <MyLoadingButton label="Sign out" onPress={handleSignOut} />
+      </View>
 
     </View>
 

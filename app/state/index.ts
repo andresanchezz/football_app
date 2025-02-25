@@ -48,7 +48,7 @@ const useUserDataStore = create<UserDataStore>((set) => ({
 }));
 
 const useStateStore = create<StateStore>((set) => ({
-    isLoading: true,
+    isLoading: false,
     setIsLoading: (isLoading: boolean) => set((_) => ({ isLoading })),
 }));
 

@@ -10,6 +10,7 @@ import { RootParamList } from '../../navigation/kickoff-stack.navigation';
 import { typography } from '../../../styles/typography';
 import { buttonStyles } from '../../../styles/styles';
 import { colors } from '../../../styles/colors';
+import { MyLoadingButton } from '../../components/shared/MyLoadingButton';
 
 
 
@@ -56,9 +57,7 @@ const LoginScreen = () => {
             />
           </View>
 
-          <TouchableOpacity onPress={handleLogin}>
-            <Text>click</Text>
-          </TouchableOpacity>
+          <MyLoadingButton label='Signin' onPress={handleLogin} />
 
         </View>
       </ScrollView>

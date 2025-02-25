@@ -29,7 +29,7 @@ const useLoginScreenHook = () => {
     }
 
     try {
-
+      setIsLoading(true)
       const { data: { accessToken, id } } = await apiServices.post<AuthResponse>('/auth/authenticate', {
         email: username,
         password: password,
@@ -53,7 +53,7 @@ const useLoginScreenHook = () => {
       })
       console.log(error)
     } finally {
-      setIsLoading(true)
+      setIsLoading(false)
     }
   };
 
