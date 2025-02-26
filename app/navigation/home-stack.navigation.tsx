@@ -3,7 +3,14 @@ import { createStackNavigator } from '@react-navigation/stack'
 import HomeTabNavigation from './home-tab.navigation'
 import PlaceScreen from '../screens/place-screen/PlaceScreen'
 
-const Stack = createStackNavigator()
+
+export type RootStackParamList = {
+    HomeTabNavigation: undefined; 
+    PlaceScreen: undefined; 
+  };
+  
+
+const Stack = createStackNavigator<RootStackParamList>();
 
 const HomeStackNavigation = () => {
     return (

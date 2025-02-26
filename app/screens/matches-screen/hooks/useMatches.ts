@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import { useAuthStore } from '../../../state';
+import { useAuthStore, useStateStore } from '../../../state';
 
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -9,22 +9,30 @@ import { Match, NewMatch } from '../../../interfaces/matches/match';
 import { apiServices } from '../../../api/services-qps';
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import moment from 'moment';
+import { Place } from '../../../interfaces/place/place';
 
+interface Options {
+    label: string,
+    value: string
+}
 
 const useMatches = () => {
 
+    const { setIsLoading } = useStateStore();
 
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoadingRefresh, setIsLoadingRefresh] = useState<boolean>(false);
 
     const [matches, setMatches] = useState<Match[]>();
-    const [selectedMatch, setSelectedMatch] = useState<Match>();
+    /* const [places, setPlaces] = useState<Place[]>(); */
+    const [optionsPlaces, setOptionsPlaces] = useState<Options[]>([]);
 
+    const [selectedMatch, setSelectedMatch] = useState<Match>();
 
     const [newMatchData, setNewMatchData] = useState<NewMatch>({
         peopleCapacity: 0,
         endTime: new Date(),
         startTime: new Date(),
-        entryCost: 20,
+        entryCost: 0,
         localName: '',
         visitorName: '',
         placeId: 0
@@ -41,43 +49,75 @@ const useMatches = () => {
 
     const getMatches = async () => {
         try {
-            setIsLoading(true)
+            setIsLoadingRefresh(true)
             const { data } = await apiServices.get<Match[]>('/match/matches');
-
             setMatches(data)
 
         } catch (error) {
             console.log('Error useMatches', error)
         } finally {
-            setIsLoading(true)
+            setIsLoadingRefresh(true)
         }
     }
+
+    const getPlaces = async () => {
+        try {
+            const { data } = await apiServices.get<Place[]>('/place/places');
+            const placesOptions = data.map((place) => ({
+                label: place.name,
+                value: place.id.toString()
+            }));
+            setOptionsPlaces(placesOptions);
+        } catch (error) {
+            console.log('Error getplaces', error);
+        }
+    };
+
 
     const createMatch = async () => {
 
-        const newMatch: NewMatch = {
-            peopleCapacity: newMatchData?.peopleCapacity,
-            localName: newMatchData.localName,
-            visitorName: newMatchData.visitorName,
-            placeId: newMatchData.placeId,
-            startTime: newMatchData.startTime,
-            endTime: newMatchData.endTime,
-            entryCost: 0
+        if (
+            newMatchData.peopleCapacity <= 0 ||
+            newMatchData.localName.trim() === '' ||
+            newMatchData.visitorName.trim() === '' ||
+            newMatchData.placeId <= 0 ||
+            !(newMatchData.startTime instanceof Date && !isNaN(newMatchData.startTime.getTime())) ||
+            !(newMatchData.endTime instanceof Date && !isNaN(newMatchData.endTime.getTime())) ||
+            newMatchData.entryCost <= 0
+        ) {
+            console.log(newMatchData)
+            console.log('Error: Faltan datos o alguna propiedad está vacía.');
+            return;
         }
 
         try {
+            setIsLoading(true)
+            const data = await apiServices.post('/match/addMatch', newMatchData);
+            console.log(data.status)
+            setNewMatchData({
+                peopleCapacity: 0,
+                localName: '',
+                visitorName: '',
+                placeId: 0,
+                startTime: new Date(),
+                endTime: new Date(),
+                entryCost: 0
+            });
 
-            const { data } = await apiServices.post('/match/addMatch', { data: newMatch })
-            console.log(data)
 
-        } catch (error) {
-            console.log('Error creando match', error)
+            newMatchBottomSheet.current?.close();
+            getMatches()
+        } catch (error: any) {
+            console.log('Error creando match', error?.response?.data);
+        } finally {
+            setIsLoading(false)
         }
+    };
 
-    }
 
     useEffect(() => {
         getMatches();
+        getPlaces();
     }, [])
 
 
@@ -92,10 +132,14 @@ const useMatches = () => {
         matchDetailsBottomSheet,
         joinMatchBottomSheet,
         openBottomSheet,
-        isLoading,
+        isLoadingRefresh,
 
         selectedMatch,
-        setSelectedMatch
+        setSelectedMatch,
+
+        optionsPlaces,
+        newMatchData,
+        setNewMatchData
 
     }
 

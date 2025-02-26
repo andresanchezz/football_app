@@ -1,30 +1,129 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
-import { Text, FAB, TextInput } from "react-native-paper";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Platform, KeyboardAvoidingView } from "react-native";
+import { Text, FAB, TextInput, PaperProvider } from "react-native-paper";
 import useMatches from "./hooks/useMatches";
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList, Pressable, ScrollView } from "react-native-gesture-handler";
 import MatchCard from "../../components/matches/MatchCard";
 import MyCustomBottomSheet from "../../components/shared/MyCustomBottomSheet";
 import { useNavigation } from "@react-navigation/native";
 import { MyLoadingButton } from "../../components/shared/MyLoadingButton";
 import { Dropdown } from "react-native-paper-dropdown";
+import { RootStackParamList } from "../../navigation/home-stack.navigation";
+import { StackNavigationProp } from "@react-navigation/stack";
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+type HomeStackNavigationProp = StackNavigationProp<RootStackParamList, 'PlaceScreen'>;
 
 export const MatchesScreen = () => {
+  const navigation = useNavigation<HomeStackNavigationProp>();
+
   const {
     getMatches,
     createMatch,
     matches,
     newMatchBottomSheet,
-    newPlaceBottomSheet,
     matchDetailsBottomSheet,
     joinMatchBottomSheet,
     openBottomSheet,
-    isLoading,
+    isLoadingRefresh,
     selectedMatch,
     setSelectedMatch,
+    optionsPlaces,
+    newMatchData,
+    setNewMatchData,
   } = useMatches();
 
-  const navigation = useNavigation();
+  // Estados para los pickers
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+
+  const [selectedPlace, setSelectedPlace] = useState<string>();
+
+  // Función para manejar la selección del día
+  const handleDateChange = (event: any, selectedDate: Date | undefined) => {
+    setShowDatePicker(Platform.OS === 'ios'); // En iOS, el picker no se cierra automáticamente
+    if (selectedDate) {
+      // Actualizamos startTime y endTime con la nueva fecha, manteniendo las horas existentes
+      const newStartTime = new Date(selectedDate);
+      newStartTime.setHours(
+        newMatchData.startTime?.getHours() || 0,
+        newMatchData.startTime?.getMinutes() || 0
+      );
+
+      const newEndTime = new Date(selectedDate);
+      newEndTime.setHours(
+        newMatchData.endTime?.getHours() || 0,
+        newMatchData.endTime?.getMinutes() || 0
+      );
+
+      setNewMatchData((prevState) => ({
+        ...prevState,
+        startTime: newStartTime,
+        endTime: newEndTime,
+      }));
+    }
+  };
+
+  // Función para manejar la selección de la hora de inicio
+  const handleStartTimeChange = (event: any, selectedTime: Date | undefined) => {
+    setShowStartTimePicker(Platform.OS === 'ios'); // En iOS, el picker no se cierra automáticamente
+    if (selectedTime) {
+      // Combinamos la fecha actual de startTime con la nueva hora
+      const newStartTime = new Date(newMatchData.startTime || new Date());
+      newStartTime.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+
+      setNewMatchData((prevState) => ({
+        ...prevState,
+        startTime: newStartTime,
+      }));
+    }
+  };
+
+  // Función para manejar la selección de la hora de fin
+  const handleEndTimeChange = (event: any, selectedTime: Date | undefined) => {
+    setShowEndTimePicker(Platform.OS === 'ios'); // En iOS, el picker no se cierra automáticamente
+    if (selectedTime) {
+      // Combinamos la fecha actual de endTime con la nueva hora
+      const newEndTime = new Date(newMatchData.endTime || new Date());
+      newEndTime.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+
+      setNewMatchData((prevState) => ({
+        ...prevState,
+        endTime: newEndTime,
+      }));
+    }
+  };
+
+  // Formatear la fecha y hora para mostrarlas en los inputs
+  const formattedDate = newMatchData.startTime
+    ? newMatchData.startTime.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+    : "";
+
+  const formattedStartTime = newMatchData.startTime
+    ? newMatchData.startTime.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    })
+    : "";
+
+  const formattedEndTime = newMatchData.endTime
+    ? newMatchData.endTime.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    })
+    : "";
+
+    useEffect(() => {
+
+    }, [matches])
+    
 
   return (
     <View style={styles.mainView}>
@@ -45,15 +144,11 @@ export const MatchesScreen = () => {
           />
         )}
         onRefresh={getMatches}
-        refreshing={isLoading}
+        refreshing={isLoadingRefresh}
       />
 
       <View style={styles.fabContainer}>
-        <FAB
-          icon="plus"
-          onPress={() => openBottomSheet(newMatchBottomSheet)}
-          style={styles.fab}
-        />
+        <FAB icon="plus" onPress={() => openBottomSheet(newMatchBottomSheet)} />
         <FAB
           icon="map-marker"
           onPress={() => navigation.navigate("PlaceScreen")}
@@ -61,49 +156,169 @@ export const MatchesScreen = () => {
       </View>
 
       {/* Modal para crear un partido */}
-      <MyCustomBottomSheet ref={newMatchBottomSheet} snapPoints={["50%", "85%"]}>
-        <View>
-          <View>
+      <MyCustomBottomSheet ref={newMatchBottomSheet} snapPoints={["50%", "95%"]}>
+        <PaperProvider>
+          <Text style={styles.modalTitleMargin} variant="headlineSmall">
+            Create match
+          </Text>
 
-            <Text style={styles.modalTitleMargin} variant="headlineSmall">Create match</Text>
+          <ScrollView>
+            {/* Selector de fecha */}
+            <Pressable onPress={() => setShowDatePicker(true)}>
+              <View pointerEvents="none">
+                <TextInput
+                  mode="outlined"
+                  label="Date"
+                  value={formattedDate}
+                  editable={false}
 
+                />
+              </View>
+            </Pressable>
 
-            <TextInput mode='outlined' label="People capacity" inputMode='numeric'></TextInput>
-            <TextInput mode='outlined' label="Local name"></TextInput>
-            <TextInput mode='outlined' label="Local visitor" ></TextInput>
-            <TextInput mode='outlined' label="Entry cost" inputMode='numeric'></TextInput>
+            {showDatePicker && (
+              <DateTimePicker
+                mode="date"
+                display="spinner"
+                value={newMatchData.startTime || new Date()}
+                onChange={handleDateChange}
+                minimumDate={new Date()}
+              />
+            )}
 
+            {/* Selector de hora de inicio */}
+            <Pressable onPress={() => setShowStartTimePicker(true)}>
+              <View pointerEvents="none">
+                <TextInput
+                  mode="outlined"
+                  label="Start time"
+                  value={formattedStartTime}
+                  editable={false}
+                />
+              </View>
+            </Pressable>
 
-            <TextInput mode='outlined' label="Date start" ></TextInput>
-            <TextInput mode='outlined' label="Date finished" ></TextInput>
+            {showStartTimePicker && (
+              <DateTimePicker
+                mode="time"
+                display="spinner"
+                value={newMatchData.startTime || new Date()}
+                onChange={handleStartTimeChange}
+              />
+            )}
 
+            {/* Selector de hora de fin */}
+            <Pressable onPress={() => setShowEndTimePicker(true)}>
+              <View pointerEvents="none">
+                <TextInput
+                  mode="outlined"
+                  label="End time"
+                  value={formattedEndTime}
+                  editable={false}
+                />
+              </View>
+            </Pressable>
+
+            {showEndTimePicker && (
+              <DateTimePicker
+                mode="time"
+                display="spinner"
+                value={newMatchData.endTime || new Date()}
+                onChange={handleEndTimeChange}
+              />
+            )}
+
+            {/* Dropdown para seleccionar el lugar */}
             <Dropdown
               label="Place"
-              mode='outlined'
-              options={[
-              ]}
+              mode="outlined"
+              options={optionsPlaces}
+              onSelect={(value) => {
+                setSelectedPlace(value);
+                setNewMatchData((prevState) => ({
+                  ...prevState,
+                  placeId: value ? parseInt(value) : 0,
+                }));
+              }}
+              value={selectedPlace}
             />
 
-            <MyLoadingButton label="Create" onPress={() => { }} />
+            {/* Input para la capacidad de personas */}
+            <TextInput
+              onChangeText={(text) => {
+                setNewMatchData((prevState) => ({
+                  ...prevState,
+                  peopleCapacity: text ? parseInt(text) : 0,
+                }));
+              }}
+              mode="outlined"
+              label="People capacity"
+              inputMode="numeric"
+              value={newMatchData.peopleCapacity.toString()} // Vinculado al estado
+            />
 
-          </View>
-        </View>
+            {/* Input para el nombre del equipo local */}
+            <TextInput
+              onChangeText={(text) => {
+                setNewMatchData((prevState) => ({
+                  ...prevState,
+                  localName: text,
+                }));
+              }}
+              mode="outlined"
+              label="Local name"
+              value={newMatchData.localName} // Vinculado al estado
+            />
+
+            {/* Input para el nombre del equipo visitante */}
+            <TextInput
+              onChangeText={(text) => {
+                setNewMatchData((prevState) => ({
+                  ...prevState,
+                  visitorName: text,
+                }));
+              }}
+              mode="outlined"
+              label="Visitor name"
+              value={newMatchData.visitorName} // Vinculado al estado
+            />
+
+            {/* Input para el costo de entrada */}
+            <TextInput
+              onChangeText={(text) => {
+                setNewMatchData((prevState) => ({
+                  ...prevState,
+                  entryCost: text ? parseInt(text) : 0,
+                }));
+              }}
+              mode="outlined"
+              label="Entry cost"
+              inputMode="numeric"
+              value={newMatchData.entryCost.toString()} // Vinculado al estado
+            />
+          </ScrollView>
+
+          {/* Botón para crear el partido */}
+          <MyLoadingButton label="Create" onPress={createMatch} />
+        </PaperProvider>
       </MyCustomBottomSheet>
 
       {/* Modal para detalles del partido */}
       <MyCustomBottomSheet ref={matchDetailsBottomSheet} snapPoints={["10%", "75%"]}>
         <View>
-          <Text style={styles.modalTitleMargin} variant="headlineSmall">Details</Text>
+          <Text style={styles.modalTitleMargin} variant="headlineSmall">
+            Details
+          </Text>
         </View>
       </MyCustomBottomSheet>
 
       {/* Modal para unirse a un partido */}
       <MyCustomBottomSheet ref={joinMatchBottomSheet} snapPoints={["10%", "75%"]}>
         <View>
-          <Text style={styles.modalTitleMargin} variant="headlineSmall">Join</Text>
-
+          <Text style={styles.modalTitleMargin} variant="headlineSmall">
+            Join
+          </Text>
           <MyLoadingButton label="Join match" onPress={() => { }} />
-
         </View>
       </MyCustomBottomSheet>
     </View>
@@ -126,7 +341,6 @@ const styles = StyleSheet.create({
   },
   modalTitleMargin: {
     marginBottom: 10,
-    textAlign: 'center'
-  }
-
+    textAlign: "center",
+  },
 });

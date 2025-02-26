@@ -28,7 +28,7 @@ const PlaceScreen = () => {
     const h = Dimensions.get("screen").height;
     const [selectedPlace, setSelectedPlace] = useState<SelectedPlace>(null);
     const [placeName, setPlaceName] = useState<string>('');
-    const [images, setImages] = useState<string[]>();
+    const [images, setImages] = useState<string[]>([]);
 
     const INITIAL_REGION: Region = {
         latitude: 37.33,
@@ -58,14 +58,14 @@ const PlaceScreen = () => {
         if (status !== 'granted') {
             return;
         }
-    
+
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: false,
             aspect: [4, 3],
             quality: 1,
         });
-    
+
         if (!result.canceled) {
             const newImage = result.assets[0].uri;
             const base64Image = await FileSystem.readAsStringAsync(newImage, { encoding: FileSystem.EncodingType.Base64 });
@@ -79,30 +79,44 @@ const PlaceScreen = () => {
             return;
         }
 
-        const newPlace = {
-            name: placeName,
-            address: `${selectedPlace.latitude}, ${selectedPlace.longitude}`,
-            images,
-        };
+        const formData = new FormData();
+
+        formData.append('name', placeName);
+        formData.append('address', `${selectedPlace.latitude}, ${selectedPlace.longitude}`);
+
+
+        images.forEach((image, index) => {
+            formData.append('images', {
+                uri: image,             
+                name: `image_${index}.jpg`, 
+                type: 'image/jpeg',      
+            });
+        });
 
         try {
-            const { data } = await apiServices.post('/place/addplace', newPlace);
-            
-        } catch (error:any) {
-            console.error('Error al crear el lugar:', error.response?.data || error);
+            await apiServices.post('/place/addplace', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data', 
+                },
+            });
 
+            setSelectedPlace(null);
+            setImages([])
+            setPlaceName('')
+
+        } catch (error: any) {
+            console.error('Error al crear el lugar:', error?.response?.data || error);
         }
     };
 
     return (
         <KeyboardAvoidingView
             style={styles.mainContainer}
-
         >
             <View style={{ flex: 1 }}>
 
                 <TextInput
-                style={{marginVertical: 10}}
+                    style={{ marginVertical: 10 }}
                     mode='outlined'
                     placeholder='Place name'
                     value={placeName}
@@ -128,7 +142,7 @@ const PlaceScreen = () => {
                                 backgroundColor: 'rgba(0,0,0,0)',
                                 borderTopWidth: 0,
                                 borderBottomWidth: 0,
-                                
+
                             },
                             textInput: {
                                 marginLeft: 0,
@@ -191,10 +205,10 @@ const PlaceScreen = () => {
 export default PlaceScreen;
 
 const styles = StyleSheet.create({
-    mainContainer:{
+    mainContainer: {
         flex: 1,
         padding: 20,
-        
+
     },
     imageContainer: {
         marginTop: 20,
