@@ -27,6 +27,7 @@ const useMatches = () => {
     const [optionsPlaces, setOptionsPlaces] = useState<Options[]>([]);
 
     const [selectedMatch, setSelectedMatch] = useState<Match>();
+    const [ticketsAmount, setTicketsAmount] = useState<number>(0);
 
     const [newMatchData, setNewMatchData] = useState<NewMatch>({
         peopleCapacity: 0,
@@ -139,7 +140,10 @@ const useMatches = () => {
 
         optionsPlaces,
         newMatchData,
-        setNewMatchData
+        setNewMatchData,
+
+        ticketsAmount, 
+        setTicketsAmount
 
     }
 

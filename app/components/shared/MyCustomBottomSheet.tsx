@@ -7,19 +7,20 @@ import CustomBottomSheet, {
 import { StyleSheet } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 
-
 interface BottomSheetProps {
     children: ReactNode;
-    snapPoints?: string[]
+    snapPoints?: string[];
+    onCloseSheet?: () => void;
 }
 
 const MyCustomBottomSheet = forwardRef<CustomBottomSheet, BottomSheetProps>(
-    ({ children, snapPoints = ['50%', '75%'] }, ref,) => {
+    ({ children, snapPoints = ['50%', '75%'], onCloseSheet }, ref) => {
 
         const handleSheetChanges = useCallback((index: number) => {
-
-        }, []);
-
+            if (index === -1 && onCloseSheet) {
+                onCloseSheet(); 
+            }
+        }, [onCloseSheet]);
 
         const renderBackdrop = useCallback(
             (props: BottomSheetBackdropProps) => (
@@ -33,14 +34,13 @@ const MyCustomBottomSheet = forwardRef<CustomBottomSheet, BottomSheetProps>(
         );
 
         return (
-            <CustomBottomSheet enableContentPanningGesture={false}
-
+            <CustomBottomSheet
                 ref={ref}
                 index={-1}
-
                 snapPoints={snapPoints}
                 onChange={handleSheetChanges}
                 backdropComponent={renderBackdrop}
+                enableContentPanningGesture={false}
             >
                 <PaperProvider>
                     <BottomSheetView style={styles.bottomSheetContent}>
@@ -57,7 +57,7 @@ export default MyCustomBottomSheet;
 const styles = StyleSheet.create({
     bottomSheetContent: {
         flex: 1,
-        padding: 20
+        padding: 20,
     },
     bottomSheetTitle: {
         textAlign: 'center',

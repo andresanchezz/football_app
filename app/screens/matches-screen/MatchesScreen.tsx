@@ -31,6 +31,9 @@ export const MatchesScreen = () => {
     optionsPlaces,
     newMatchData,
     setNewMatchData,
+
+    ticketsAmount,
+    setTicketsAmount
   } = useMatches();
 
   // Estados para los pickers
@@ -39,6 +42,10 @@ export const MatchesScreen = () => {
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
   const [selectedPlace, setSelectedPlace] = useState<string>();
+
+  const onCloseSheet = () =>{
+    setTicketsAmount(0)
+  }
 
   // Función para manejar la selección del día
   const handleDateChange = (event: any, selectedDate: Date | undefined) => {
@@ -120,10 +127,10 @@ export const MatchesScreen = () => {
     })
     : "";
 
-    useEffect(() => {
+  useEffect(() => {
 
-    }, [matches])
-    
+  }, [matches])
+
 
   return (
     <View style={styles.mainView}>
@@ -313,10 +320,51 @@ export const MatchesScreen = () => {
       </MyCustomBottomSheet>
 
       {/* Modal para unirse a un partido */}
-      <MyCustomBottomSheet ref={joinMatchBottomSheet} snapPoints={["10%", "75%"]}>
+      <MyCustomBottomSheet onCloseSheet={onCloseSheet}  ref={joinMatchBottomSheet} snapPoints={["10%", "50%"]}>
         <View>
+
+
           <Text style={styles.modalTitleMargin} variant="headlineSmall">
-            Join
+            {selectedMatch ? selectedMatch.localName : ''}
+            {""} vs {""}
+            {selectedMatch ? selectedMatch.visitorName : ''}
+          </Text>
+
+          <TextInput
+            style={{ marginVertical: 10 }}
+            keyboardType="numeric"
+            mode="outlined"
+            label="Tickets"
+            value={ticketsAmount.toString()}
+            onChangeText={(value) => {
+              if (selectedMatch) {
+                let selectedTickets = value ? parseInt(value) : 0;
+                const availableTickets = selectedMatch?.peopleCapacity - selectedMatch?.registeredPeople;
+
+
+                if (availableTickets < selectedTickets) {
+                  selectedTickets = availableTickets;
+                }
+
+                setTicketsAmount(selectedTickets);
+              }
+            }}
+          />
+
+
+          <Text variant="bodyLarge">
+            Available tickets:{" "}
+            {selectedMatch ? (selectedMatch?.peopleCapacity - selectedMatch?.registeredPeople) : ''}
+          </Text>
+
+          <Text variant="bodyLarge">
+            Ticket cost:{" "}
+            {selectedMatch ? (selectedMatch?.entryCost) : ''}
+          </Text>
+
+          <Text variant="bodyLarge">
+            Total $:{" "}
+            {selectedMatch ? (parseInt(selectedMatch?.entryCost) * ticketsAmount) : ''}
           </Text>
           <MyLoadingButton label="Join match" onPress={() => { }} />
         </View>
