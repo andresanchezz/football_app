@@ -33,7 +33,9 @@ export const MatchesScreen = () => {
     setNewMatchData,
 
     ticketsAmount,
-    setTicketsAmount
+    setTicketsAmount,
+
+    purchaseTickets
   } = useMatches();
 
   // Estados para los pickers
@@ -43,7 +45,7 @@ export const MatchesScreen = () => {
 
   const [selectedPlace, setSelectedPlace] = useState<string>();
 
-  const onCloseSheet = () =>{
+  const onCloseSheet = () => {
     setTicketsAmount(0)
   }
 
@@ -320,7 +322,7 @@ export const MatchesScreen = () => {
       </MyCustomBottomSheet>
 
       {/* Modal para unirse a un partido */}
-      <MyCustomBottomSheet onCloseSheet={onCloseSheet}  ref={joinMatchBottomSheet} snapPoints={["10%", "50%"]}>
+      <MyCustomBottomSheet onCloseSheet={onCloseSheet} ref={joinMatchBottomSheet} snapPoints={["10%", "50%"]}>
         <View>
 
 
@@ -366,7 +368,7 @@ export const MatchesScreen = () => {
             Total $:{" "}
             {selectedMatch ? (parseInt(selectedMatch?.entryCost) * ticketsAmount) : ''}
           </Text>
-          <MyLoadingButton label="Join match" onPress={() => { }} />
+          <MyLoadingButton label="Join match" onPress={purchaseTickets} />
         </View>
       </MyCustomBottomSheet>
     </View>

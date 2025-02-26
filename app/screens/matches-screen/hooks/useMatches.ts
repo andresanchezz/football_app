@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import { useAuthStore, useStateStore } from '../../../state';
+import { useAuthStore, useStateStore, useUserDataStore } from '../../../state';
 
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -10,6 +10,7 @@ import { apiServices } from '../../../api/services-qps';
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import moment from 'moment';
 import { Place } from '../../../interfaces/place/place';
+import { Purchase } from '../../../interfaces/matches/purchase';
 
 interface Options {
     label: string,
@@ -17,6 +18,8 @@ interface Options {
 }
 
 const useMatches = () => {
+
+    const { user } = useUserDataStore();
 
     const { setIsLoading } = useStateStore();
 
@@ -74,7 +77,6 @@ const useMatches = () => {
         }
     };
 
-
     const createMatch = async () => {
 
         if (
@@ -115,6 +117,30 @@ const useMatches = () => {
         }
     };
 
+    const purchaseTickets = async () => {
+
+        if (!selectedMatch || !user) {
+            return
+        }
+
+        try {
+            setIsLoading(true)
+            const { data } = await apiServices.post<Purchase>('/match/purchase', {
+                userId: user.id,
+                matchId: selectedMatch.id,
+                ticketsBought: ticketsAmount
+            })
+            joinMatchBottomSheet.current?.close();
+
+            
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
 
     useEffect(() => {
         getMatches();
@@ -142,8 +168,10 @@ const useMatches = () => {
         newMatchData,
         setNewMatchData,
 
-        ticketsAmount, 
-        setTicketsAmount
+        ticketsAmount,
+        setTicketsAmount,
+
+        purchaseTickets
 
     }
 
