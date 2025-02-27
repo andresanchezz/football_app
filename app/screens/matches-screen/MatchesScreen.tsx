@@ -297,7 +297,7 @@ export const MatchesScreen = () => {
               onChangeText={(text) => {
                 setNewMatchData((prevState) => ({
                   ...prevState,
-                  entryCost: text ? parseInt(text) : 0,
+                  entryCost: text ? parseInt(text) * 100 : 0,
                 }));
               }}
               mode="outlined"

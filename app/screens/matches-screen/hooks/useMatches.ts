@@ -100,7 +100,7 @@ const useMatches = () => {
         try {
             setIsLoading(true)
             const data = await apiServices.post('/match/addMatch', newMatchData);
-            console.log(data.status)
+
             setNewMatchData({
                 peopleCapacity: 0,
                 localName: '',
@@ -130,30 +130,34 @@ const useMatches = () => {
 
         try {
             setIsLoading(true);
-
+    
             const { data } = await apiServices.post<Purchase>('/match/purchase', {
                 userId: user.id,
                 matchId: selectedMatch.id,
                 ticketsBought: ticketsAmount
             });
 
-
             joinMatchBottomSheet.current?.close();
-
 
             setTimeout(async () => {
                 await paymentSheet(data);
+
+                console.log('hola')
+                confirmPreauthorization(data.paymentIntentId)
+
             }, 1000);
+
+
+
 
         } catch (error) {
             console.error("Error durante la compra de boletos:", error);
-            // Aquí podrías mostrar un mensaje de error al usuario
             Toast.show({
                 text1: 'Error',
                 text2: 'Hubo un problema al procesar tu compra. Por favor, intenta de nuevo.',
             });
         } finally {
-            setIsLoading(false); // Desactiva el estado de carga
+            setIsLoading(false);
         }
     }
 
@@ -174,6 +178,16 @@ const useMatches = () => {
                 text1: 'Error',
                 text2: 'Hubo un problema al procesar tu pago. Por favor, intenta de nuevo.',
             });
+        }
+    }
+
+    const confirmPreauthorization = async (preAuthorizationId: string) => {
+        console.log(preAuthorizationId)
+        try {
+            const { data } = await apiServices.post('/match/confirmPreauthorization', preAuthorizationId);
+            console.log(data)
+        } catch (error:any) {
+            console.log('error en confirm authorization')
         }
     }
 
