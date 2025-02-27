@@ -11,6 +11,8 @@ import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import moment from 'moment';
 import { Place } from '../../../interfaces/place/place';
 import { Purchase } from '../../../interfaces/matches/purchase';
+import { StripeError, useStripe } from '@stripe/stripe-react-native';
+import Toast from 'react-native-toast-message';
 
 interface Options {
     label: string,
@@ -20,6 +22,8 @@ interface Options {
 const useMatches = () => {
 
     const { user } = useUserDataStore();
+
+    const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
     const { setIsLoading } = useStateStore();
 
@@ -118,26 +122,58 @@ const useMatches = () => {
     };
 
     const purchaseTickets = async () => {
-
+        // Verifica si hay un partido seleccionado y un usuario autenticado
         if (!selectedMatch || !user) {
-            return
+            console.error("No se ha seleccionado un partido o el usuario no está autenticado.");
+            return;
         }
 
         try {
-            setIsLoading(true)
+            setIsLoading(true);
+
             const { data } = await apiServices.post<Purchase>('/match/purchase', {
                 userId: user.id,
                 matchId: selectedMatch.id,
                 ticketsBought: ticketsAmount
-            })
+            });
+
+
             joinMatchBottomSheet.current?.close();
 
-            
+
+            setTimeout(async () => {
+                await paymentSheet(data);
+            }, 1000);
 
         } catch (error) {
-            console.log(error)
+            console.error("Error durante la compra de boletos:", error);
+            // Aquí podrías mostrar un mensaje de error al usuario
+            Toast.show({
+                text1: 'Error',
+                text2: 'Hubo un problema al procesar tu compra. Por favor, intenta de nuevo.',
+            });
         } finally {
-            setIsLoading(false)
+            setIsLoading(false); // Desactiva el estado de carga
+        }
+    }
+
+    const paymentSheet = async (paymentData: Purchase) => {
+        try {
+            // Inicializa la hoja de pago con los datos proporcionados
+            const initResponse = await initPaymentSheet({
+                merchantDisplayName: 'Nombre del Comercio', // Cambia esto por el nombre de tu comercio
+                paymentIntentClientSecret: paymentData.paymentIntentKey
+            });
+
+            // Presenta la hoja de pago al usuario
+            await presentPaymentSheet();
+
+        } catch (error: any) {
+            console.error("Error durante el proceso de pago:", error);
+            Toast.show({
+                text1: 'Error',
+                text2: 'Hubo un problema al procesar tu pago. Por favor, intenta de nuevo.',
+            });
         }
     }
 
