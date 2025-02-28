@@ -10,15 +10,14 @@ type NavigationProp = StackNavigationProp<RootParamList, 'LoginScreen'>;
 const useProfile = () => {
 
     const store = useAuthStore();
-    const { user } = useAuthStore();
 
     const handleSignOut = async () => {
         store.signOut();
+        SecureStore.deleteItemAsync('userData')
     }
 
     return {
         handleSignOut,
-        user
     }
 
 }

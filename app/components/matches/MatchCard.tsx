@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
-import { Match } from '../../interfaces/matches/match';
+import {  MatchAdapted } from '../../interfaces/matches/match';
 import moment from 'moment';
 
 interface MatchCardProps {
-    match: Match
+    match: MatchAdapted
     showDetails: () => void
     joinMatch: () => void
 }
@@ -25,15 +25,17 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, showDetails, joinMatch }) 
                     <View style={styles.column}>
                         <Text style={styles.teamText}>{match.localName}</Text>
                         <Text style={styles.costText}>Ticket cost</Text>
-                        <Text style={styles.timeText}>Start time</Text>
-                        <Text style={styles.timeText}>End time</Text>
+                        <Text style={styles.costText}>Schedule</Text>
+                        <Text style={styles.timeText}>Starts</Text>
+                        <Text style={styles.timeText}>Ends</Text>
 
                     </View>
                     <View style={[styles.column, styles.columnLeft]}>
                         <Text style={styles.teamText}>{match.visitorName}</Text>
-                        <Text style={styles.costText}>{match.entryCost}</Text>
-                        <Text style={styles.timeText}>{moment(match.startTime).format('MMMM D, YYYY')}</Text>
-                        <Text style={styles.timeText}>{moment(match.endTime).format('MMMM D, YYYY')}</Text>
+                        <Text style={styles.costText}>$ {match.entryCost}</Text>
+                        <Text style={styles.costText}>{match.matchDay}</Text>
+                        <Text style={styles.timeText}>{match.startTime}</Text>
+                        <Text style={styles.timeText}>{match.endTime}</Text>
                     </View>
                 </View>
                 <View style={{ height: 15 }}></View>

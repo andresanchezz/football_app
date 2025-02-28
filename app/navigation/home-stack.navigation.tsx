@@ -4,9 +4,11 @@ import HomeTabNavigation from './home-tab.navigation'
 import PlaceScreen from '../screens/place-screen/PlaceScreen'
 
 
+
 export type RootStackParamList = {
     HomeTabNavigation: undefined; 
     PlaceScreen: undefined; 
+    HistoryScreen: undefined; 
   };
   
 

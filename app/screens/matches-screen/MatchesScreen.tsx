@@ -11,6 +11,7 @@ import { Dropdown } from "react-native-paper-dropdown";
 import { RootStackParamList } from "../../navigation/home-stack.navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { colors } from "../../../styles/colors";
 
 type HomeStackNavigationProp = StackNavigationProp<RootStackParamList, 'PlaceScreen'>;
 
@@ -141,6 +142,7 @@ export const MatchesScreen = () => {
         keyExtractor={(item, index) => String(index)}
         renderItem={({ item }) => (
           <MatchCard
+          key={item.id}
             match={item}
             showDetails={() => {
               setSelectedMatch({ ...item });
@@ -303,7 +305,7 @@ export const MatchesScreen = () => {
               mode="outlined"
               label="Entry cost"
               inputMode="numeric"
-              value={newMatchData.entryCost.toString()} // Vinculado al estado
+              value={(newMatchData.entryCost / 100).toString()} // Vinculado al estado
             />
           </ScrollView>
 
@@ -324,8 +326,6 @@ export const MatchesScreen = () => {
       {/* Modal para unirse a un partido */}
       <MyCustomBottomSheet onCloseSheet={onCloseSheet} ref={joinMatchBottomSheet} snapPoints={["10%", "50%"]}>
         <View>
-
-
           <Text style={styles.modalTitleMargin} variant="headlineSmall">
             {selectedMatch ? selectedMatch.localName : ''}
             {""} vs {""}
@@ -360,13 +360,13 @@ export const MatchesScreen = () => {
           </Text>
 
           <Text variant="bodyLarge">
-            Ticket cost:{" "}
-            {selectedMatch ? (selectedMatch?.entryCost) : ''}
+            Ticket cost:{" $"}
+            {selectedMatch ? selectedMatch?.entryCost : ''}
           </Text>
 
           <Text variant="bodyLarge">
             Total $:{" "}
-            {selectedMatch ? (parseInt(selectedMatch?.entryCost) * ticketsAmount) : ''}
+            {selectedMatch ? (selectedMatch?.entryCost * ticketsAmount) : ''}
           </Text>
           <MyLoadingButton label="Join match" onPress={purchaseTickets} />
         </View>
@@ -377,7 +377,7 @@ export const MatchesScreen = () => {
 
 const styles = StyleSheet.create({
   mainView: {
-    backgroundColor: "#FFF",
+    backgroundColor: colors.light,
     flex: 1,
     paddingVertical: 20,
     paddingHorizontal: 10,

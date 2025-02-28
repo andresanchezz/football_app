@@ -59,9 +59,11 @@ const useLoginScreenHook = () => {
 
   const getUserInfo = async (userId: number) => {
     try {
+      
       const { data } = await apiServices.get(`/user/infouser/${userId}`)
-      setUser(data)
-      console.log(data)
+
+      SecureStore.setItem('userData', JSON.stringify(data));
+
     } catch (error) {
       console.log('Error getuserinfo', error)
     }

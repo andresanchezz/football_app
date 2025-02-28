@@ -6,13 +6,17 @@ import { Avatar, Text } from "react-native-paper";
 import { useUserDataStore } from "../../state";
 import { MyLoadingButton } from "../../components/shared/MyLoadingButton";
 
+import * as secureStore from 'expo-secure-store';
 
 
 
 export const ProfileScreen = () => {
 
   const { handleSignOut } = useProfile();
-  const { user } = useUserDataStore();
+
+  const userString = secureStore.getItem('userData');
+  const user = userString ? JSON.parse(userString) : null;
+
 
   return (
 

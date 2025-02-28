@@ -1,17 +1,14 @@
 import * as SecureStore from 'expo-secure-store';
-import { useAuthStore, useStateStore, useUserDataStore } from '../../../state';
+import { useStateStore } from '../../../state';
 
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootParamList } from '../../../navigation/kickoff-stack.navigation';
 import { useEffect, useRef, useState } from 'react';
-import { Match, NewMatch } from '../../../interfaces/matches/match';
+import { Match, MatchAdapted, MatchAdapter, NewMatch } from '../../../interfaces/matches/match';
 import { apiServices } from '../../../api/services-qps';
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import moment from 'moment';
+
 import { Place } from '../../../interfaces/place/place';
 import { Purchase } from '../../../interfaces/matches/purchase';
-import { StripeError, useStripe } from '@stripe/stripe-react-native';
+import { useStripe } from '@stripe/stripe-react-native';
 import Toast from 'react-native-toast-message';
 
 interface Options {
@@ -21,7 +18,8 @@ interface Options {
 
 const useMatches = () => {
 
-    const { user } = useUserDataStore();
+    const userString = SecureStore.getItem('userData');
+    const user = userString ? JSON.parse(userString) : null;
 
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
@@ -29,11 +27,11 @@ const useMatches = () => {
 
     const [isLoadingRefresh, setIsLoadingRefresh] = useState<boolean>(false);
 
-    const [matches, setMatches] = useState<Match[]>();
-    /* const [places, setPlaces] = useState<Place[]>(); */
+    const [matches, setMatches] = useState<MatchAdapted[]>();
+
     const [optionsPlaces, setOptionsPlaces] = useState<Options[]>([]);
 
-    const [selectedMatch, setSelectedMatch] = useState<Match>();
+    const [selectedMatch, setSelectedMatch] = useState<MatchAdapted>();
     const [ticketsAmount, setTicketsAmount] = useState<number>(0);
 
     const [newMatchData, setNewMatchData] = useState<NewMatch>({
@@ -59,7 +57,8 @@ const useMatches = () => {
         try {
             setIsLoadingRefresh(true)
             const { data } = await apiServices.get<Match[]>('/match/matches');
-            setMatches(data)
+            const adaptedMatches = data.map(MatchAdapter.fromExternalToInternal);
+            setMatches(adaptedMatches)
 
         } catch (error) {
             console.log('Error useMatches', error)
@@ -92,13 +91,14 @@ const useMatches = () => {
             !(newMatchData.endTime instanceof Date && !isNaN(newMatchData.endTime.getTime())) ||
             newMatchData.entryCost <= 0
         ) {
-            console.log(newMatchData)
             console.log('Error: Faltan datos o alguna propiedad está vacía.');
             return;
         }
 
+
         try {
             setIsLoading(true)
+
             const data = await apiServices.post('/match/addMatch', newMatchData);
 
             setNewMatchData({
@@ -121,6 +121,8 @@ const useMatches = () => {
         }
     };
 
+    //*Payment
+
     const purchaseTickets = async () => {
         // Verifica si hay un partido seleccionado y un usuario autenticado
         if (!selectedMatch || !user) {
@@ -130,7 +132,7 @@ const useMatches = () => {
 
         try {
             setIsLoading(true);
-    
+
             const { data } = await apiServices.post<Purchase>('/match/purchase', {
                 userId: user.id,
                 matchId: selectedMatch.id,
@@ -142,7 +144,6 @@ const useMatches = () => {
             setTimeout(async () => {
                 await paymentSheet(data);
 
-                console.log('hola')
                 confirmPreauthorization(data.paymentIntentId)
 
             }, 1000);
@@ -163,13 +164,13 @@ const useMatches = () => {
 
     const paymentSheet = async (paymentData: Purchase) => {
         try {
-            // Inicializa la hoja de pago con los datos proporcionados
-            const initResponse = await initPaymentSheet({
-                merchantDisplayName: 'Nombre del Comercio', // Cambia esto por el nombre de tu comercio
+
+            await initPaymentSheet({
+                merchantDisplayName: 'Nombre del Comercio',
                 paymentIntentClientSecret: paymentData.paymentIntentKey
             });
 
-            // Presenta la hoja de pago al usuario
+
             await presentPaymentSheet();
 
         } catch (error: any) {
@@ -184,9 +185,9 @@ const useMatches = () => {
     const confirmPreauthorization = async (preAuthorizationId: string) => {
         console.log(preAuthorizationId)
         try {
-            const { data } = await apiServices.post('/match/confirmPreauthorization', preAuthorizationId);
-            console.log(data)
-        } catch (error:any) {
+            const { data } = await apiServices.post('/match/confirmPreauthorization', { preAuthorizationId });
+
+        } catch (error: any) {
             console.log('error en confirm authorization')
         }
     }
