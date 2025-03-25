@@ -27,21 +27,14 @@ export const useHistory = () => {
         }
     }
 
-
-
     const generateQr = async (match: MatchAdapted) => {
 
         try {
             const { data } = await apiServices.get(`/user/uuid/${user.id}/${match.id}`);
-            console.log(data)
+            setQrValue(data.uuid)
         } catch (error: any) {
             console.log(error)
         }
-
-         openQrBottomSheet(); 
-    }
-
-    const openQrBottomSheet = () => {
 
         qrBotomSheetRef.current?.expand()
     }

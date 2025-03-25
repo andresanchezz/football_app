@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { useStateStore } from '../../../state';
 
 import { useEffect, useRef, useState } from 'react';
-import { Match, MatchAdapted, MatchAdapter, NewMatch } from '../../../interfaces/matches/match';
+import { Match, MatchAdapted, MatchAdapter } from '../../../interfaces/matches/match';
 import { apiServices } from '../../../api/services-qps';
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
@@ -10,6 +10,8 @@ import { Place } from '../../../interfaces/place/place';
 import { Purchase } from '../../../interfaces/matches/purchase';
 import { useStripe } from '@stripe/stripe-react-native';
 import Toast from 'react-native-toast-message';
+
+
 
 interface Options {
     label: string,
@@ -34,7 +36,7 @@ const useMatches = () => {
     const [selectedMatch, setSelectedMatch] = useState<MatchAdapted>();
     const [ticketsAmount, setTicketsAmount] = useState<number>(0);
 
-    const [newMatchData, setNewMatchData] = useState<NewMatch>({
+    const [newMatchData, setNewMatchData] = useState({
         peopleCapacity: 0,
         endTime: new Date(),
         startTime: new Date(),
@@ -59,7 +61,6 @@ const useMatches = () => {
             const { data } = await apiServices.get<Match[]>('/match/matches');
             const adaptedMatches = data.map(MatchAdapter.fromExternalToInternal);
             setMatches(adaptedMatches)
-
         } catch (error) {
             console.log('Error useMatches', error)
         } finally {
@@ -191,6 +192,10 @@ const useMatches = () => {
             console.log('error en confirm authorization')
         }
     }
+
+
+    //* Scan QR */
+
 
 
     useEffect(() => {

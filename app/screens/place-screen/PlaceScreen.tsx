@@ -16,6 +16,9 @@ import { MyLoadingButton } from '../../components/shared/MyLoadingButton';
 import { apiServices } from '../../api/services-qps';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import Toast from 'react-native-toast-message';
+import { useStateStore } from '../../state';
+
 
 type SelectedPlace = {
     latitude: number;
@@ -29,6 +32,8 @@ const PlaceScreen = () => {
     const [selectedPlace, setSelectedPlace] = useState<SelectedPlace>(null);
     const [placeName, setPlaceName] = useState<string>('');
     const [images, setImages] = useState<string[]>([]);
+
+    const { setIsLoading } = useStateStore();
 
     const INITIAL_REGION: Region = {
         latitude: 37.33,
@@ -75,7 +80,15 @@ const PlaceScreen = () => {
     };
 
     const handleCreatePlace = async () => {
+
         if (!placeName || !selectedPlace || !images || images.length === 0) {
+            Toast.show(
+                {
+                    type: 'error',
+                    text1: 'All fileds required',
+                    text2: 'Name, location and at least one image'
+                }
+            )
             return;
         }
 
@@ -85,18 +98,21 @@ const PlaceScreen = () => {
         formData.append('address', `${selectedPlace.latitude}, ${selectedPlace.longitude}`);
 
 
+
         images.forEach((image, index) => {
             formData.append('images', {
-                uri: image,             
-                name: `image_${index}.jpg`, 
-                type: 'image/jpeg',      
+                uri: image,
+                name: `image_${index}.jpg`,
+                type: 'image/jpeg',
             });
         });
 
+
         try {
+            setIsLoading(true)
             await apiServices.post('/place/addplace', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data', 
+                    'Content-Type': 'multipart/form-data',
                 },
             });
 
@@ -105,7 +121,8 @@ const PlaceScreen = () => {
             setPlaceName('')
 
         } catch (error: any) {
-            console.error('Error al crear el lugar:', error?.response?.data || error);
+        } finally {
+            setIsLoading(false)
         }
     };
 

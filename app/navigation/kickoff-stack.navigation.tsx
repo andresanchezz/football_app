@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { useAuthStore, useHomeStore } from '../state'
 
 import HomeStackNavigation from './home-stack.navigation'
-import LoginScreen from '../screens/login-screen/LoginScreen'
+import AuthScreen from '../screens/login-screen/AuthScreen'
 import SplashScreen from '../screens/splash-screen/SplashScreen'
 
 export type RootParamList = {
@@ -15,7 +15,7 @@ export type RootParamList = {
 const Stack = createStackNavigator()
 
 const KickoffStackNavigation = () => {
-    
+
     const { isLoading } = useHomeStore();
     const { token } = useAuthStore();
 
@@ -28,7 +28,7 @@ const KickoffStackNavigation = () => {
                 isLoading
                     ? (<Stack.Screen name="SplashScreen" component={SplashScreen} />)
                     : token == ""
-                        ? (<Stack.Screen name="LoginScreen" component={LoginScreen} />)
+                        ? (<Stack.Screen name="LoginScreen" component={AuthScreen} />)
                         : (<Stack.Screen name="HomeStackNavigation" component={HomeStackNavigation} />)
             }
         </Stack.Navigator>

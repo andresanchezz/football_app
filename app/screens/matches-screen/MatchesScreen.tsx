@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, Platform, KeyboardAvoidingView } from "react-native";
 import { Text, FAB, TextInput, PaperProvider } from "react-native-paper";
 import useMatches from "./hooks/useMatches";
 import { FlatList, Pressable, ScrollView } from "react-native-gesture-handler";
 import MatchCard from "../../components/matches/MatchCard";
 import MyCustomBottomSheet from "../../components/shared/MyCustomBottomSheet";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { MyLoadingButton } from "../../components/shared/MyLoadingButton";
 import { Dropdown } from "react-native-paper-dropdown";
 import { RootStackParamList } from "../../navigation/home-stack.navigation";
@@ -39,6 +39,12 @@ export const MatchesScreen = () => {
     purchaseTickets
   } = useMatches();
 
+  useFocusEffect(
+    useCallback(() => {
+      getMatches()
+    }, [])
+  );
+
   // Estados para los pickers
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
@@ -67,7 +73,7 @@ export const MatchesScreen = () => {
         newMatchData.endTime?.getMinutes() || 0
       );
 
-      setNewMatchData((prevState) => ({
+      setNewMatchData((prevState: any) => ({
         ...prevState,
         startTime: newStartTime,
         endTime: newEndTime,
@@ -83,7 +89,7 @@ export const MatchesScreen = () => {
       const newStartTime = new Date(newMatchData.startTime || new Date());
       newStartTime.setHours(selectedTime.getHours(), selectedTime.getMinutes());
 
-      setNewMatchData((prevState) => ({
+      setNewMatchData((prevState: any) => ({
         ...prevState,
         startTime: newStartTime,
       }));
@@ -98,7 +104,7 @@ export const MatchesScreen = () => {
       const newEndTime = new Date(newMatchData.endTime || new Date());
       newEndTime.setHours(selectedTime.getHours(), selectedTime.getMinutes());
 
-      setNewMatchData((prevState) => ({
+      setNewMatchData((prevState: any) => ({
         ...prevState,
         endTime: newEndTime,
       }));
@@ -142,7 +148,7 @@ export const MatchesScreen = () => {
         keyExtractor={(item, index) => String(index)}
         renderItem={({ item }) => (
           <MatchCard
-          key={item.id}
+            key={item.id}
             match={item}
             showDetails={() => {
               setSelectedMatch({ ...item });
@@ -159,11 +165,16 @@ export const MatchesScreen = () => {
       />
 
       <View style={styles.fabContainer}>
+        <FAB
+          icon="qrcode"
+          onPress={() => navigation.navigate("PlaceScreen")}
+        />
         <FAB icon="plus" onPress={() => openBottomSheet(newMatchBottomSheet)} />
         <FAB
           icon="map-marker"
           onPress={() => navigation.navigate("PlaceScreen")}
         />
+
       </View>
 
       {/* Modal para crear un partido */}
@@ -246,7 +257,7 @@ export const MatchesScreen = () => {
               options={optionsPlaces}
               onSelect={(value) => {
                 setSelectedPlace(value);
-                setNewMatchData((prevState) => ({
+                setNewMatchData((prevState: any) => ({
                   ...prevState,
                   placeId: value ? parseInt(value) : 0,
                 }));
@@ -257,7 +268,7 @@ export const MatchesScreen = () => {
             {/* Input para la capacidad de personas */}
             <TextInput
               onChangeText={(text) => {
-                setNewMatchData((prevState) => ({
+                setNewMatchData((prevState: any) => ({
                   ...prevState,
                   peopleCapacity: text ? parseInt(text) : 0,
                 }));
@@ -271,7 +282,7 @@ export const MatchesScreen = () => {
             {/* Input para el nombre del equipo local */}
             <TextInput
               onChangeText={(text) => {
-                setNewMatchData((prevState) => ({
+                setNewMatchData((prevState: any) => ({
                   ...prevState,
                   localName: text,
                 }));
@@ -284,7 +295,7 @@ export const MatchesScreen = () => {
             {/* Input para el nombre del equipo visitante */}
             <TextInput
               onChangeText={(text) => {
-                setNewMatchData((prevState) => ({
+                setNewMatchData((prevState: any) => ({
                   ...prevState,
                   visitorName: text,
                 }));
@@ -297,7 +308,7 @@ export const MatchesScreen = () => {
             {/* Input para el costo de entrada */}
             <TextInput
               onChangeText={(text) => {
-                setNewMatchData((prevState) => ({
+                setNewMatchData((prevState: any) => ({
                   ...prevState,
                   entryCost: text ? parseInt(text) * 100 : 0,
                 }));

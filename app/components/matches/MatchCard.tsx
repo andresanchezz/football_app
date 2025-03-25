@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
-import {  MatchAdapted } from '../../interfaces/matches/match';
-import moment from 'moment';
+import { MatchAdapted } from '../../interfaces/matches/match';
+import buttonStyles from '../../../assets/styles'
 
 interface MatchCardProps {
     match: MatchAdapted
@@ -23,28 +23,29 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, showDetails, joinMatch }) 
             <Card.Content>
                 <View style={styles.matchInfoContainer}>
                     <View style={styles.column}>
-                        <Text style={styles.teamText}>{match.localName}</Text>
-                        <Text style={styles.costText}>Ticket cost</Text>
-                        <Text style={styles.costText}>Schedule</Text>
-                        <Text style={styles.timeText}>Starts</Text>
-                        <Text style={styles.timeText}>Ends</Text>
+                        <Text>{match.localName}</Text>
+                        <Text>Ticket cost</Text>
+                        <Text>Schedule</Text>
+                        <Text>Starts</Text>
+                        <Text>Ends</Text>
 
                     </View>
-                    <View style={[styles.column, styles.columnLeft]}>
-                        <Text style={styles.teamText}>{match.visitorName}</Text>
-                        <Text style={styles.costText}>$ {match.entryCost}</Text>
-                        <Text style={styles.costText}>{match.matchDay}</Text>
-                        <Text style={styles.timeText}>{match.startTime}</Text>
-                        <Text style={styles.timeText}>{match.endTime}</Text>
+                    <View style={styles.column}>
+                        <Text>{match.visitorName}</Text>
+                        <Text>$ {match.entryCost}</Text>
+                        <Text>{match.matchDay}</Text>
+                        <Text>{match.startTime}</Text>
+                        <Text>{match.endTime}</Text>
                     </View>
                 </View>
                 <View style={{ height: 15 }}></View>
-                <TouchableOpacity onPress={() => { showDetails() }}>
-                    <Text>Details</Text>
+
+                <TouchableOpacity style={buttonStyles.buttonStyles.button} onPress={() => { joinMatch() }}>
+                    <Text style={buttonStyles.buttonStyles.textButton} >Join</Text>
                 </TouchableOpacity>
-                <View style={{ height: 15 }}></View>
-                <TouchableOpacity onPress={() => { joinMatch() }}>
-                    <Text >Join</Text>
+
+                <TouchableOpacity onPress={() => { showDetails() }}>
+                    <Text style={buttonStyles.buttonStyles.textButtonBlack}>Details</Text>
                 </TouchableOpacity>
 
             </Card.Content>
@@ -94,17 +95,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
 
-    columnLeft: {
 
-    },
 
-    teamText: {
-
-    },
-    costText: {
-
-    },
-    timeText: {
-
-    },
 });

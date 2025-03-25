@@ -7,32 +7,44 @@ import { useState } from 'react';
 import { useAuthStore, useStateStore, useUserDataStore } from '../../../state';
 
 
-const useLoginScreenHook = () => {
+const useAuthScreenHook = () => {
+
+  enum roles {
+    player = "player"
+  }
 
   const { setToken } = useAuthStore();
   const { setIsLoading } = useStateStore();
   const { setUser } = useUserDataStore();
-  const [username, setEmail] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
 
+  const checkFields = (fields: string[]) => {
 
-  const handleLogin = async () => {
+    fields.map((field) => {
 
+      if (field.trim() === "") {
+        Toast.show({
+          type: 'error',
+          text1: 'Empty fields',
+          text2: 'Please fill all fields',
+        });
+        return;
+      }
+    })
 
-    if (!username || !password) {
-      Toast.show({
-        type: 'error',
-        text1: 'Campos vacíos',
-        text2: 'Por favor llene ambos campos',
-      });
-      return;
-    }
+  }
+
+  const handleSignIn = async () => {
+
+    checkFields([email, password])
 
     try {
       setIsLoading(true)
       const { data: { accessToken, id } } = await apiServices.post<AuthResponse>('/auth/authenticate', {
-        email: username,
-        password: password,
+        email,
+        password,
       });
 
       await SecureStore.setItemAsync('userToken', accessToken);
@@ -57,9 +69,31 @@ const useLoginScreenHook = () => {
     }
   };
 
+  const handleSignUp = async () => {
+
+    checkFields([email, name, password])
+    
+    setIsLoading(true)
+    try {
+      await apiServices.post<AuthResponse>('/auth/register', {
+        email,
+        password,
+        name,
+        role: roles.player
+      });
+
+      handleSignIn()
+
+    } catch (error) {
+
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const getUserInfo = async (userId: number) => {
     try {
-      
+
       const { data } = await apiServices.get(`/user/infouser/${userId}`)
 
       SecureStore.setItem('userData', JSON.stringify(data));
@@ -70,12 +104,15 @@ const useLoginScreenHook = () => {
   }
 
   return {
-    handleLogin,
-    username,
+    handleSignIn,
+    email,
+    username: name,
     password,
     setEmail,
     setPassword,
+    setUsername: setName,
+    handleSignUp
   }
 }
 
-export default useLoginScreenHook
+export default useAuthScreenHook

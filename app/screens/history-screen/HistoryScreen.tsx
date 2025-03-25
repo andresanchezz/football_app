@@ -43,13 +43,12 @@ export const HistoryScreen = () => {
 
 
       <MyCustomBottomSheet ref={qrBotomSheetRef} snapPoints={['25%', '50%']}>
-        <View>
-          <Text style={{textAlign: 'center'}} variant='headlineSmall'>Use following QR as ticket</Text>
-
-          <Text>{qrValue}</Text>
-
+        <View style={{ flex: 1 }}>
+          <Text style={{ textAlign: 'center' }} variant='headlineSmall'>Use following QR as ticket</Text>
           {
-            qrValue && <QRCode value={qrValue} />
+            qrValue && <View style={[{ flex: 1, alignItems: 'center', justifyContent: 'center' }]}>
+              <QRCode size={200} value={qrValue} />
+            </View>
           }
 
         </View>
