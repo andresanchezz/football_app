@@ -65,13 +65,15 @@ export const MatchesScreen = () => {
     ticketsAmount,
     setTicketsAmount,
 
-    purchaseTickets
+    purchaseTickets,
+    getPlaces
 
   } = useMatches();
 
   useFocusEffect(
     useCallback(() => {
       getMatches();
+      getPlaces();
     }, [])
   );
 

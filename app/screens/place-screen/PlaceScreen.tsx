@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     Image,
     StyleSheet,
@@ -8,8 +8,8 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Marker, Region } from 'react-native-maps';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import MapView, { PROVIDER_GOOGLE, Marker, Region, PROVIDER_DEFAULT } from 'react-native-maps';
+import { GooglePlaceData, GooglePlacesAutocomplete, GooglePlacesAutocompleteRef } from 'react-native-google-places-autocomplete';
 import { Dimensions } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 import { MyLoadingButton } from '../../components/shared/MyLoadingButton';
@@ -28,6 +28,9 @@ type SelectedPlace = {
 } | null;
 
 const PlaceScreen = () => {
+
+    const placeAutocompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+
     const h = Dimensions.get("screen").height;
     const [selectedPlace, setSelectedPlace] = useState<SelectedPlace>(null);
     const [placeName, setPlaceName] = useState<string>('');
@@ -97,8 +100,6 @@ const PlaceScreen = () => {
         formData.append('name', placeName);
         formData.append('address', `${selectedPlace.latitude}, ${selectedPlace.longitude}`);
 
-
-
         images.forEach((image, index) => {
             formData.append('images', {
                 uri: image,
@@ -116,9 +117,19 @@ const PlaceScreen = () => {
                 },
             });
 
+            Toast.show(
+                {
+                    type: 'success',
+                    text1: 'Place created',
+                }
+            )
+
             setSelectedPlace(null);
             setImages([])
             setPlaceName('')
+            if (placeAutocompleteRef.current) {
+                placeAutocompleteRef.current.clear();
+            }
 
         } catch (error: any) {
         } finally {
@@ -142,12 +153,11 @@ const PlaceScreen = () => {
 
                 <View style={{ height: h * .35 }}>
                     <GooglePlacesAutocomplete
-                        placeholder="Buscar lugar"
+                        ref={placeAutocompleteRef}
+                        placeholder="Search place"
                         onPress={(data, details = null) => {
                             if (details) {
                                 handlePlaceSelect(details);
-                            } else {
-                                console.error('No se encontraron detalles del lugar seleccionado.');
                             }
                         }}
                         query={{
@@ -182,7 +192,7 @@ const PlaceScreen = () => {
                     <MapView
                         style={[StyleSheet.absoluteFill, { zIndex: -1 }]}
                         initialRegion={INITIAL_REGION}
-                        provider={PROVIDER_GOOGLE}
+                        provider={PROVIDER_DEFAULT}
                         showsUserLocation
                         showsMyLocationButton
                         region={selectedPlace ? selectedPlace : INITIAL_REGION}
@@ -193,7 +203,7 @@ const PlaceScreen = () => {
                                     latitude: selectedPlace.latitude,
                                     longitude: selectedPlace.longitude,
                                 }}
-                                title="Lugar seleccionado"
+                                title="Selected place"
                             />
                         )}
                     </MapView>

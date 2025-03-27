@@ -303,6 +303,8 @@ const useMatches = () => {
         setShowEndTimePicker,
         setSelectedPlace,
 
+        getPlaces
+
     }
 
 }

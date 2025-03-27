@@ -16,9 +16,17 @@
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tu galería para seleccionar fotos."
       },
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "AIzaSyAvM9_t9vcwwev-iyuaIoqtNWcjRrzI4ew"
+      }
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAvM9_t9vcwwev-iyuaIoqtNWcjRrzI4ew"
+        }
+      },
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
