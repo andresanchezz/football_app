@@ -28,16 +28,19 @@ const HomeTabNavigation = () => {
             <Tab.Screen options={{
                 headerTitleAlign: 'center',
                 title: 'Matches',
+                headerShown: false
             }} name="MatchesScreen" component={MatchesScreen} />
 
             <Tab.Screen options={{
                 title: "History",
-                headerTitleAlign: 'center'
+                headerTitleAlign: 'center',
+                headerShown: false
             }} name="HistoryScreen" component={HistoryScreen} />
 
             <Tab.Screen options={{
                 title: "Profile",
-                headerTitleAlign: 'center'
+                headerTitleAlign: 'center',
+                headerShown: false
             }} name="ProfileScreen" component={ProfileScreen} />
 
 

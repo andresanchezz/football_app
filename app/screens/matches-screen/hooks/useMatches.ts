@@ -36,6 +36,11 @@ const useMatches = () => {
     const [selectedMatch, setSelectedMatch] = useState<MatchAdapted>();
     const [ticketsAmount, setTicketsAmount] = useState<number>(0);
 
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+    const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+    const [selectedPlace, setSelectedPlace] = useState<string>();
+
     const [newMatchData, setNewMatchData] = useState({
         peopleCapacity: 0,
         endTime: new Date(),
@@ -81,26 +86,70 @@ const useMatches = () => {
         }
     };
 
-    const createMatch = async () => {
+    const validateMatchData = (matchData: typeof newMatchData): { isValid: boolean; errorMessage?: string } => {
+        // Validar campos requeridos
+        if (matchData.localName.trim() === '') {
+            return { isValid: false, errorMessage: 'Local team name is required' };
+        }
 
-        if (
-            newMatchData.peopleCapacity <= 0 ||
-            newMatchData.localName.trim() === '' ||
-            newMatchData.visitorName.trim() === '' ||
-            newMatchData.placeId <= 0 ||
-            !(newMatchData.startTime instanceof Date && !isNaN(newMatchData.startTime.getTime())) ||
-            !(newMatchData.endTime instanceof Date && !isNaN(newMatchData.endTime.getTime())) ||
-            newMatchData.entryCost <= 0
-        ) {
-            console.log('Error: Faltan datos o alguna propiedad está vacía.');
+        if (matchData.visitorName.trim() === '') {
+            return { isValid: false, errorMessage: 'Visitor team name is required' };
+        }
+
+        if (matchData.placeId <= 0) {
+            return { isValid: false, errorMessage: 'Please select a valid place' };
+        }
+
+        // Validar fechas
+        if (!(matchData.startTime instanceof Date) || isNaN(matchData.startTime.getTime())) {
+            return { isValid: false, errorMessage: 'Invalid start time' };
+        }
+
+        if (!(matchData.endTime instanceof Date) || isNaN(matchData.endTime.getTime())) {
+            return { isValid: false, errorMessage: 'Invalid end time' };
+        }
+
+        if (matchData.endTime <= matchData.startTime) {
+            return { isValid: false, errorMessage: 'End time must be after start time' };
+        }
+
+        // Validar números positivos
+        if (matchData.peopleCapacity <= 0) {
+            return { isValid: false, errorMessage: 'People capacity must be greater than 0' };
+        }
+
+        if (matchData.entryCost <= 0) {
+            return { isValid: false, errorMessage: 'Entry cost must be greater than 0' };
+        }
+
+        return { isValid: true };
+    };
+
+    const createMatch = async () => {
+        const validation = validateMatchData(newMatchData);
+        if (!validation.isValid) {
+            Toast.show({
+                type: 'error',
+                text1: 'Validation Error',
+                text2: validation.errorMessage || 'Please check your input data',
+            });
             return;
         }
 
-
         try {
-            setIsLoading(true)
+            setIsLoading(true);
 
-            const data = await apiServices.post('/match/addMatch', newMatchData);
+            await apiServices.post('/match/addMatch', newMatchData);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Match created',
+            });
+
+            setShowDatePicker(false)
+            setShowStartTimePicker(false)
+            setShowEndTimePicker(false)
+            setSelectedPlace('');
 
             setNewMatchData({
                 peopleCapacity: 0,
@@ -112,13 +161,28 @@ const useMatches = () => {
                 entryCost: 0
             });
 
-
+            // Cerrar modal y refrescar lista
             newMatchBottomSheet.current?.close();
-            getMatches()
+            getMatches();
+
+            // Mostrar éxito
+            Toast.show({
+                type: 'success',
+                text1: 'Match created',
+                text2: 'Your match has been successfully created',
+                visibilityTime: 2000,
+            });
+
         } catch (error: any) {
-            console.log('Error creando match', error?.response?.data);
+            console.log('Error creating match', error?.response?.data);
+            Toast.show({
+                type: 'error',
+                text1: 'Server error',
+                text2: error.response?.data?.message || 'Failed to create match',
+                visibilityTime: 3000,
+            });
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
     };
 
@@ -227,7 +291,17 @@ const useMatches = () => {
         ticketsAmount,
         setTicketsAmount,
 
-        purchaseTickets
+        purchaseTickets,
+
+        showDatePicker,
+        showStartTimePicker,
+        showEndTimePicker,
+        selectedPlace,
+
+        setShowDatePicker,
+        setShowStartTimePicker,
+        setShowEndTimePicker,
+        setSelectedPlace,
 
     }
 

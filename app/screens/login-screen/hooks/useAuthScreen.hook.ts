@@ -50,7 +50,7 @@ const useAuthScreenHook = () => {
       await SecureStore.setItemAsync('userToken', accessToken);
 
       setToken(accessToken);
-
+      console.log(accessToken);
       await getUserInfo(id);
 
       setIsLoading(true)

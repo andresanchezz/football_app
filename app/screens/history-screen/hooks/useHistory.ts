@@ -15,7 +15,7 @@ export const useHistory = () => {
     const user: InfoUser = userString ? JSON.parse(userString) : null
 
     const [userMatches, setUserMatches] = useState<MatchAdapted[]>([]);
-    const [qrValue, setQrValue] = useState<string>();
+    const [qrValue, setQrValue] = useState<string | null>();
 
     const getUserMatches = async () => {
         try {
@@ -28,10 +28,13 @@ export const useHistory = () => {
     }
 
     const generateQr = async (match: MatchAdapted) => {
-
         try {
             const { data } = await apiServices.get(`/user/uuid/${user.id}/${match.id}`);
-            setQrValue(data.uuid)
+            const qrData = {
+                gameId: match.id,
+                uuid: data.uuid,
+            }
+            setQrValue(JSON.stringify(qrData))
         } catch (error: any) {
             console.log(error)
         }
@@ -49,7 +52,8 @@ export const useHistory = () => {
         qrBotomSheetRef,
         generateQr,
         qrValue,
-        setQrValue
+        setQrValue,
+        getUserMatches
     }
 
 

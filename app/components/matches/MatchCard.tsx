@@ -44,10 +44,6 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, showDetails, joinMatch }) 
                     <Text style={buttonStyles.buttonStyles.textButton} >Join</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => { showDetails() }}>
-                    <Text style={buttonStyles.buttonStyles.textButtonBlack}>Details</Text>
-                </TouchableOpacity>
-
             </Card.Content>
         </Card>
     )
